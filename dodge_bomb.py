@@ -41,19 +41,32 @@ def main():
     bakudan_rct = bakudan_img.get_rect()
     bakudan_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
     vx, vy = +5, +5  #横移動速度、縦移動速度
+
+    blackout_img = pg.Surface((WIDTH, HEIGHT))
+    pg.draw.rect(blackout_img, (0, 0, 0), (0, 0, WIDTH, HEIGHT))
+    blackout_img.set_alpha(127)
+    fonto = pg.font.Font(None, 80)
+    go_txt = fonto.render("Game Over", True, (255, 255, 255))
+    kkcry_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 2.0)
+
     clock = pg.time.Clock()
     tmr = 0
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
             
-        if kk_rct.colliderect(bakudan_rct):  #こうかとんと爆弾がぶつかったら
-            print("Game Over")
+        if kk_rct.colliderect(bakudan_rct):  # こうかとんと爆弾がぶつかったら
+            screen.blit(blackout_img, [0, 0])
+            screen.blit(go_txt, [620, HEIGHT/2])
+            screen.blit(kkcry_img, [500, HEIGHT/2])
+            screen.blit(kkcry_img, [960, HEIGHT/2])
+            pg.display.update()
+            pg.time.delay(5000)  # 5秒間ゲームオーバー画面を表示し続ける
             return
-        
-        screen.blit(bg_img, [0, 0]) 
 
+        screen.blit(bg_img, [0, 0]) 
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
         for k, v in DELTA.items():
