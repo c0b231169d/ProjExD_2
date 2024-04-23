@@ -14,6 +14,20 @@ DELTA = {  #移動量辞書
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
+def check_bound(obj_rct:pg.Rect) -> tuple[bool, bool]:
+    """
+    こうかとんRectまたは爆弾Rectの画面内外判定用の関数
+    引数：こうかとんRect または　爆弾Rect
+    戻り値：横方向判定結果　縦方向判定結果　画面内ならTrue、画面外ならFalse
+    """
+    yoko, tate = True, True
+    if obj_rct.left < 0 or WIDTH < obj_rct.right:
+        yoko = False
+    if obj_rct.top < 0 or HEIGHT < obj_rct.bottom:
+        tate = False
+    return yoko, tate
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -26,7 +40,7 @@ def main():
     bakudan_img.set_colorkey((0, 0, 0))
     bakudan_rct = bakudan_img.get_rect()
     bakudan_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
-    vx, vy = +5, -5  #横移動速度、縦移動速度
+    vx, vy = +5, +5  #横移動速度、縦移動速度
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -42,9 +56,16 @@ def main():
                 sum_mv[0] += v[0]
                 sum_mv[1] += v[1]
         kk_rct.move_ip(sum_mv)
+        if check_bound(kk_rct) != (True, True):
+            kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
         bakudan_rct.move_ip(vx, vy)
         screen.blit(bakudan_img, bakudan_rct)
+        yoko, tate = check_bound(bakudan_rct)
+        if not yoko == True:
+            vx *= -1
+        if not tate == True:
+            vy *= -1
         pg.display.update()
         tmr += 1
         clock.tick(50)
