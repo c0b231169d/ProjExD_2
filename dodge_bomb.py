@@ -31,10 +31,23 @@ def check_bound(obj_rct:pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
+def check_gameover(kk_rct: pg.Rect, bakudan_rct: pg.Rect) -> bool:
+    """
+    ゲームオーバーになる状況かどうか(こうかとんと爆弾が重なっているかどうか)判定する
+    戻り値：ゲームオーバーでない時Falseを、ゲームオーバーの時Trueを返す
+    """
+    if kk_rct.colliderect(bakudan_rct):
+        return True
+    else:
+        return False
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")    
+
+    # こうかとんの回転画像
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 2.0)
     kk_img2 = pg.transform.rotozoom(pg.image.load("fig/3.png"), -45, 2.0)
     kk_img3 = pg.transform.rotozoom(pg.image.load("fig/3.png"), -90, 2.0)
@@ -43,6 +56,7 @@ def main():
     kk_img4 = pg.transform.flip(kk_img2, True, False)
     kk_img5 = pg.transform.flip(kk_img, True, False)
     kk_img6 = pg.transform.flip(kk_img8, True, False)
+
     kk_rct = kk_img.get_rect()
     kk_rct.center = 900, 400
     bakudan_img = pg.Surface((20, 20))
@@ -51,12 +65,15 @@ def main():
     bakudan_rct = bakudan_img.get_rect()
     bakudan_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
     vx, vy = +5, +5  #横移動速度、縦移動速度
+
+    # ゲームオーバー用
     blackout_img = pg.Surface((WIDTH, HEIGHT))
     pg.draw.rect(blackout_img, (0, 0, 0), (0, 0, WIDTH, HEIGHT))
     blackout_img.set_alpha(127)
     fonto = pg.font.Font(None, 80)
     go_txt = fonto.render("Game Over", True, (255, 255, 255))
     kkcry_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 2.0)
+
     clock = pg.time.Clock()
     tmr = 0
 
@@ -65,7 +82,7 @@ def main():
             if event.type == pg.QUIT: 
                 return
             
-        if kk_rct.colliderect(bakudan_rct):  # こうかとんと爆弾がぶつかったら
+        if check_gameover(kk_rct, bakudan_rct):
             screen.blit(blackout_img, [0, 0])
             screen.blit(go_txt, [620, HEIGHT/2])
             screen.blit(kkcry_img, [500, HEIGHT/2])
@@ -84,7 +101,7 @@ def main():
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
-        screen.blit(kk_img, kk_rct)  # こうかとんの画像を表示
+        screen.blit(kk_img, kk_rct)
         bakudan_rct.move_ip(vx, vy)
         screen.blit(bakudan_img, bakudan_rct)
         yoko, tate = check_bound(bakudan_rct)
